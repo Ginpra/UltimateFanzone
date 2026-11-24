@@ -1,9 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Akun dan sesi login LOKAL memakai SharedPreferences (Modul VI).
-///
-/// Tidak ada server: akun hanya ada di HP ini. Password disimpan apa adanya
-/// (cukup untuk latihan praktikum, bukan untuk aplikasi sungguhan).
+/// Akun dan sesi login lokal (SharedPreferences). Tidak ada server; password disimpan
+/// apa adanya, cukup untuk latihan.
 class SessionService {
   static const _sessionKey = 'session_user';
   static const _accountPrefix = 'account_';

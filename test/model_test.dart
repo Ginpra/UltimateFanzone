@@ -1,12 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ultimate_fanzone/core/club_stats.dart';
+import 'package:ultimate_fanzone/core/crest_registry.dart';
 import 'package:ultimate_fanzone/core/format.dart';
 import 'package:ultimate_fanzone/core/gemini_parser.dart';
 import 'package:ultimate_fanzone/core/reflex_rules.dart';
+import 'package:ultimate_fanzone/model/club_info.dart';
 import 'package:ultimate_fanzone/model/expense.dart';
 import 'package:ultimate_fanzone/model/football_match.dart';
 import 'package:ultimate_fanzone/model/match_note.dart';
 import 'package:ultimate_fanzone/model/prediction.dart';
+import 'package:ultimate_fanzone/model/scorer_row.dart';
 import 'package:ultimate_fanzone/model/stadium.dart';
 import 'package:ultimate_fanzone/model/stamp.dart';
 import 'package:ultimate_fanzone/model/standing_row.dart';
@@ -81,6 +84,7 @@ void main() {
   geminiAndReflexTests();
   clubStatsTests();
   homeAndGroupingTests();
+  clubInfoTests();
 }
 
 void predictionAndFormatTests() {
@@ -331,5 +335,116 @@ void homeAndGroupingTests() {
     expect(groups.length, 2);
     expect(groups.first.key, DateTime(2026, 11, 21));
     expect(groups.last.value.map((m) => m.id).toList(), [2, 1]);
+  });
+}
+
+void clubInfoTests() {
+  final arsenal = {
+    'name': 'Arsenal FC',
+    'shortName': 'Arsenal',
+    'tla': 'ARS',
+    'crest': 'https://crests.football-data.org/57.png',
+    'founded': 1886,
+    'venue': 'Emirates Stadium',
+    'coach': {'name': 'Mikel Arteta', 'nationality': 'Spain'},
+    'squad': [
+      {
+        'name': 'David Raya',
+        'position': 'Goalkeeper',
+        'dateOfBirth': '1995-09-15',
+        'nationality': 'Spain',
+      },
+      {
+        'name': 'William Saliba',
+        'position': 'Centre-Back',
+        'dateOfBirth': '2001-03-24',
+        'nationality': 'France',
+      },
+      {
+        'name': 'Declan Rice',
+        'position': 'Central Midfield',
+        'dateOfBirth': '1999-01-14',
+        'nationality': 'England',
+      },
+      {
+        'name': 'Bukayo Saka',
+        'position': 'Right Winger',
+        'dateOfBirth': '2001-09-05',
+        'nationality': 'England',
+      },
+      {
+        'name': 'Tanpa Posisi',
+        'position': null,
+        'dateOfBirth': null,
+        'nationality': null,
+      },
+    ],
+  };
+
+  test('ClubInfo.fromJson membaca profil, pelatih, dan skuad', () {
+    final club = ClubInfo.fromJson(arsenal);
+    expect(club.shortName, 'Arsenal');
+    expect(club.founded, 1886);
+    expect(club.coachName, 'Mikel Arteta');
+    expect(club.squad.length, 5);
+  });
+
+  test('ClubInfo.fromJson tahan data minimal tanpa skuad', () {
+    final club = ClubInfo.fromJson({'name': 'X FC', 'tla': 'XXX'});
+    expect(club.shortName, 'X FC');
+    expect(club.squad, isEmpty);
+    expect(club.coachName, isNull);
+  });
+
+  test('groupSquad: kelompok berurutan dan kelompok kosong dibuang', () {
+    final groups = groupSquad(ClubInfo.fromJson(arsenal).squad);
+    expect(groups.map((g) => g.key).toList(), [
+      'Kiper',
+      'Bek',
+      'Gelandang',
+      'Penyerang',
+      'Lainnya',
+    ]);
+    final onlyKeepers = groupSquad([
+      const Player(name: 'A', position: 'Goalkeeper', nationality: ''),
+    ]);
+    expect(onlyKeepers.map((g) => g.key).toList(), ['Kiper']);
+  });
+
+  test('Player.ageOn menghitung usia sebelum dan sesudah ulang tahun', () {
+    final raya = ClubInfo.fromJson(arsenal).squad.first;
+    expect(raya.ageOn(DateTime(2026, 11, 22)), 31);
+    expect(raya.ageOn(DateTime(2026, 9, 14)), 30);
+    expect(ClubInfo.fromJson(arsenal).squad.last.ageOn(DateTime(2026)), isNull);
+  });
+
+  test('Logo klub dibaca dari respons API dan disimpan di CrestRegistry', () {
+    final match = FootballMatch.fromJson({
+      'id': 1,
+      'utcDate': '2026-11-22T15:00:00Z',
+      'status': 'SCHEDULED',
+      'homeTeam': {'name': 'A', 'crest': 'https://x/1.png'},
+      'awayTeam': {'name': 'B'},
+      'score': {
+        'fullTime': {'home': null, 'away': null},
+      },
+    });
+    expect(match.homeCrest, 'https://x/1.png');
+    expect(match.awayCrest, isNull);
+    expect(
+      ScorerRow.fromJson({
+        'player': {'name': 'P'},
+        'team': {'name': 'A', 'crest': 'c2'},
+        'goals': 1,
+      }).teamCrest,
+      'c2',
+    );
+
+    CrestRegistry.register('Arsenal', 'u1');
+    CrestRegistry.register('Chelsea', '');
+    CrestRegistry.register('Spurs', null);
+    expect(CrestRegistry.urlFor('Arsenal'), 'u1');
+    expect(CrestRegistry.urlFor('Chelsea'), isNull);
+    expect(CrestRegistry.urlFor('Spurs'), isNull);
   });
 }

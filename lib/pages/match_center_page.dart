@@ -15,12 +15,10 @@ import '../widgets/fade_slide_in.dart';
 import '../widgets/info_banner.dart';
 import '../widgets/match_tile.dart';
 import '../widgets/scrim_image.dart';
+import 'club_detail_page.dart';
 
-/// Jadwal (dikelompokkan per hari), klasemen, dan top skor Premier League.
-///
-/// Pola Modul V: data diambil di service (bukan di widget); layar hanya
-/// menyimpan status `_loading`, `_error`, dan data di State lalu memanggil
-/// `setState` setelah data siap. Klub favorit disimpan di SharedPreferences.
+/// Jadwal per hari, klasemen, dan top skor. Data diambil di service (Modul V);
+/// layar hanya menyimpan `_loading`, `_error`, dan data lalu memanggil `setState`.
 class MatchCenterPage extends StatefulWidget {
   const MatchCenterPage({super.key});
 
@@ -342,63 +340,70 @@ class _MatchCenterPageState extends State<MatchCenterPage> {
     } else if (total >= 18 && r.position > total - 3) {
       zone = Colors.red;
     }
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: isFavorite ? context.fz.surfaceHigh : null,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
+    return InkWell(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ClubDetailPage(clubName: r.team)),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 3,
-            height: 28,
-            decoration: BoxDecoration(
-              color: zone ?? Colors.transparent,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          SizedBox(
-            width: 28,
-            child: Text('${r.position}', style: theme.textTheme.titleSmall),
-          ),
-          ClubCrest(name: r.team, size: 32),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              r.team,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: isFavorite ? FontWeight.bold : null,
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        decoration: BoxDecoration(
+          color: isFavorite ? context.fz.surfaceHigh : null,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 3,
+              height: 28,
+              decoration: BoxDecoration(
+                color: zone ?? Colors.transparent,
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
-          ),
-          SizedBox(
-            width: 30,
-            child: Text(
-              '${r.played}',
-              style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+            const SizedBox(width: AppSpacing.sm),
+            SizedBox(
+              width: 28,
+              child: Text('${r.position}', style: theme.textTheme.titleSmall),
             ),
-          ),
-          SizedBox(
-            width: 38,
-            child: Text(
-              '${r.goalDiff}',
-              style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+            ClubCrest(name: r.team, size: 32),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                r.team,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: isFavorite ? FontWeight.bold : null,
+                ),
+              ),
             ),
-          ),
-          SizedBox(
-            width: 40,
-            child: Text(
-              '${r.points}',
-              textAlign: TextAlign.end,
-              style: theme.textTheme.titleSmall,
+            SizedBox(
+              width: 30,
+              child: Text(
+                '${r.played}',
+                style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+              ),
             ),
-          ),
-        ],
+            SizedBox(
+              width: 38,
+              child: Text(
+                '${r.goalDiff}',
+                style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+              ),
+            ),
+            SizedBox(
+              width: 40,
+              child: Text(
+                '${r.points}',
+                textAlign: TextAlign.end,
+                style: theme.textTheme.titleSmall,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

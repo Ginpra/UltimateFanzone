@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_tokens.dart';
+import '../core/feature_tones.dart';
 import 'app_card.dart';
 import 'fade_slide_in.dart';
 import 'scrim_image.dart';
@@ -12,9 +13,11 @@ class MenuItem {
     required this.title,
     required this.subtitle,
     required this.builder,
+    required this.tone,
   });
 
   final IconData icon;
+  final FeatureTone tone;
   final String title;
   final String subtitle;
   final WidgetBuilder builder;
@@ -111,7 +114,11 @@ class FeatureMenu extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(featured.icon, color: fz.accent, size: 28),
+                            Icon(
+                              featured.icon,
+                              color: featured.tone.color,
+                              size: 30,
+                            ),
                             const SizedBox(height: AppSpacing.sm),
                             Text(
                               featured.title,
@@ -137,7 +144,7 @@ class FeatureMenu extends StatelessWidget {
                 FadeSlideIn(
                   index: i + 1,
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
                     child: AppCard(
                       onTap: () => _open(context, items[i]),
                       padding: const EdgeInsets.symmetric(

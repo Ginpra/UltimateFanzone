@@ -118,7 +118,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         elevation: 0,
         color: scheme.surface,
-        margin: EdgeInsets.zero,
+        margin: const EdgeInsets.only(bottom: AppSpacing.md),
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),

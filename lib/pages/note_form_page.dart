@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import '../model/match_note.dart';
 import '../service/notes_service.dart';
 
-/// Form tambah atau ubah catatan laga.
-///
-/// Bila [existing] diisi, form berisi data lama (mode ubah). Mengembalikan
-/// `true` lewat `Navigator.pop` bila catatan tersimpan.
+/// Form tambah atau ubah catatan. Mengembalikan `true` lewat `Navigator.pop` bila tersimpan.
 class NoteFormPage extends StatefulWidget {
   const NoteFormPage({super.key, this.existing});
 

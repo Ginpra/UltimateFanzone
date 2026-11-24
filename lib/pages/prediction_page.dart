@@ -8,10 +8,8 @@ import '../service/prediction_service.dart';
 import '../widgets/error_state.dart';
 import '../widgets/score_picker_dialog.dart';
 
-/// Prediksi skor: pilih laga mendatang, tebak skornya, lihat poin setelah
-/// laga selesai (skor persis 3 poin, hasil benar 1 poin).
-///
-/// Modul: V (data laga dari API), VI (tebakan disimpan di Hive), III setState.
+/// Prediksi skor: tebak laga mendatang; poin setelah laga selesai (persis 3, hasil benar 1).
+/// Modul: V, VI (Hive), III.
 class PredictionPage extends StatefulWidget {
   const PredictionPage({super.key});
 

@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import '../model/app_settings.dart';
 import '../service/settings_service.dart';
 
-/// Pengaturan suporter (SharedPreferences, Modul VI).
-///
-/// Mengembalikan `true` lewat `Navigator.pop` bila disimpan, supaya layar
-/// sebelumnya memuat ulang datanya (Modul IV).
+/// Pengaturan suporter (SharedPreferences). Mengembalikan `true` lewat `Navigator.pop` bila disimpan.
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 

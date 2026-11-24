@@ -1,7 +1,5 @@
 /// Mengambil teks jawaban dari respons Gemini `generateContent`.
-///
-/// Bentuk respons: `candidates[0].content.parts[].text`. Bagian "thought"
-/// (proses berpikir model) dilewati. Mengembalikan null bila tidak ada teks.
+/// Bagian "thought" dilewati; null bila tidak ada teks.
 String? parseGeminiText(Object? body) {
   if (body is! Map) return null;
   final candidates = body['candidates'];

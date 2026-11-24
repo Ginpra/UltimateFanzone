@@ -1,4 +1,3 @@
-/// Satu stempel di Paspor Suporter.
 class Stamp {
   const Stamp({
     required this.stadium,

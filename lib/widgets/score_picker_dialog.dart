@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Dialog memilih skor tebakan dengan tombol minus dan plus.
-///
-/// Mengembalikan `[skorTuanRumah, skorTamu]` lewat `Navigator.pop`,
+/// Dialog tebak skor. Mengembalikan `[tuanRumah, tamu]` lewat `Navigator.pop`,
 /// atau null bila dibatalkan.
 class ScorePickerDialog extends StatefulWidget {
   const ScorePickerDialog({

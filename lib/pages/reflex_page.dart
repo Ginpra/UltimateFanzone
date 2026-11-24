@@ -6,10 +6,8 @@ import 'package:flutter/material.dart';
 import '../core/reflex_rules.dart';
 import '../service/settings_service.dart';
 
-/// Refleks Kiper: bola muncul di salah satu dari 6 zona gawang, tepuk zona
-/// itu sebelum waktunya habis. Salah tepuk atau telat mengurangi nyawa.
-///
-/// Modul: III (state dan setState), VI (skor terbaik di SharedPreferences).
+/// Refleks Kiper: tepuk zona gawang tempat bola muncul sebelum waktu habis; salah atau
+/// telat mengurangi nyawa. Modul: III, VI (skor terbaik di SharedPreferences).
 class ReflexPage extends StatefulWidget {
   const ReflexPage({super.key});
 

@@ -1,4 +1,3 @@
-/// Satu baris klasemen.
 class StandingRow {
   const StandingRow({
     required this.position,
@@ -9,6 +8,7 @@ class StandingRow {
     required this.lost,
     required this.goalDiff,
     required this.points,
+    this.crest,
   });
 
   final int position;
@@ -19,6 +19,7 @@ class StandingRow {
   final int lost;
   final int goalDiff;
   final int points;
+  final String? crest;
 
   factory StandingRow.fromJson(Map<String, dynamic> json) {
     final team = json['team'] as Map<String, dynamic>;
@@ -31,6 +32,7 @@ class StandingRow {
       lost: (json['lost'] as num?)?.toInt() ?? 0,
       goalDiff: (json['goalDifference'] as num?)?.toInt() ?? 0,
       points: (json['points'] as num?)?.toInt() ?? 0,
+      crest: team['crest'] as String?,
     );
   }
 }

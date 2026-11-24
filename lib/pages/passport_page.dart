@@ -6,11 +6,8 @@ import '../model/stamp.dart';
 import '../service/location_service.dart';
 import '../service/stamp_service.dart';
 
-/// Paspor Suporter: kumpulkan stempel dari 20 stadion.
-///
-/// Cap lewat GPS hanya diterima bila kamu dalam jarak [stampRadiusMeters]
-/// dari stadion. Mode demo mematikan pengecekan GPS (untuk presentasi).
-/// Modul: VII (lokasi), VI (Hive), III (setState).
+/// Paspor Suporter: stempel dari 20 stadion. Cap lewat GPS hanya diterima dalam
+/// [stampRadiusMeters] dari stadion; mode demo melewati GPS untuk presentasi.
 class PassportPage extends StatefulWidget {
   const PassportPage({super.key});
 

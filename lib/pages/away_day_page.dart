@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../core/app_tokens.dart';
 import '../core/format.dart';
 import '../model/expense.dart';
 import '../service/expense_service.dart';
@@ -8,10 +9,8 @@ import '../service/settings_service.dart';
 import '../widgets/empty_state.dart';
 import 'expense_form_page.dart';
 
-/// Away Day: catat pengeluaran perjalanan tandang dan pantau anggaran.
-///
-/// Modul: II (Card, LinearProgressIndicator, Dismissible), III setState,
-/// IV Navigator, VI (Hive untuk pengeluaran, SharedPreferences untuk anggaran).
+/// Away Day: catat pengeluaran tandang dan pantau anggaran.
+/// Modul: II, III, IV, VI (Hive untuk pengeluaran, SharedPreferences untuk anggaran).
 class AwayDayPage extends StatefulWidget {
   const AwayDayPage({super.key});
 
@@ -176,26 +175,30 @@ class _AwayDayPageState extends State<AwayDayPage> {
                   )
                 else
                   for (final e in _expenses)
-                    Dismissible(
-                      key: ValueKey(e.id),
-                      direction: DismissDirection.endToStart,
-                      confirmDismiss: (_) => _confirmDelete(e),
-                      background: Container(
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        color: Theme.of(context).colorScheme.error,
-                        child: Icon(
-                          Icons.delete_outline,
-                          color: Theme.of(context).colorScheme.onError,
-                        ),
-                      ),
-                      child: Card(
-                        child: ListTile(
-                          title: Text(e.title),
-                          subtitle: Text(
-                            '${e.category} · ${formatDateTime(e.createdAt)}',
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                      child: Dismissible(
+                        key: ValueKey(e.id),
+                        direction: DismissDirection.endToStart,
+                        confirmDismiss: (_) => _confirmDelete(e),
+                        background: Container(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(right: 20),
+                          color: Theme.of(context).colorScheme.error,
+                          child: Icon(
+                            Icons.delete_outline,
+                            color: Theme.of(context).colorScheme.onError,
                           ),
-                          trailing: Text(formatRupiah(e.amount)),
+                        ),
+                        child: Card(
+                          margin: EdgeInsets.zero,
+                          child: ListTile(
+                            title: Text(e.title),
+                            subtitle: Text(
+                              '${e.category} · ${formatDateTime(e.createdAt)}',
+                            ),
+                            trailing: Text(formatRupiah(e.amount)),
+                          ),
                         ),
                       ),
                     ),

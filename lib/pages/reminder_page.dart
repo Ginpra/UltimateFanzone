@@ -7,10 +7,8 @@ import '../service/notification_service.dart';
 import '../service/settings_service.dart';
 import '../widgets/error_state.dart';
 
-/// Pengingat laga: nyalakan lonceng pada laga mendatang, notifikasi muncul
-/// beberapa menit sebelum kickoff.
-///
-/// Modul: VII (notifikasi instan dan terjadwal), V (data laga), VI (SharedPreferences).
+/// Pengingat laga: lonceng per laga memasang notifikasi sebelum kickoff.
+/// Modul: VII (notifikasi instan dan terjadwal), V, VI.
 class ReminderPage extends StatefulWidget {
   const ReminderPage({super.key});
 

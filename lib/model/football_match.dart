@@ -9,6 +9,8 @@ class FootballMatch {
     this.matchday,
     this.homeScore,
     this.awayScore,
+    this.homeCrest,
+    this.awayCrest,
   });
 
   final int id;
@@ -21,6 +23,8 @@ class FootballMatch {
   final int? matchday;
   final int? homeScore;
   final int? awayScore;
+  final String? homeCrest;
+  final String? awayCrest;
 
   bool get isFinished => status == 'FINISHED';
   bool get isLive => status == 'IN_PLAY' || status == 'PAUSED';
@@ -43,6 +47,8 @@ class FootballMatch {
       awayName: (away['shortName'] ?? away['name'] ?? '?').toString(),
       homeScore: (fullTime?['home'] as num?)?.toInt(),
       awayScore: (fullTime?['away'] as num?)?.toInt(),
+      homeCrest: home['crest'] as String?,
+      awayCrest: away['crest'] as String?,
     );
   }
 }

@@ -4,8 +4,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 
 import '../core/app_config.dart';
+import '../core/crest_registry.dart';
+import '../model/club_info.dart';
 import '../model/football_match.dart';
 import '../model/scorer_row.dart';
+import '../model/stadium.dart';
 import '../model/standing_row.dart';
 
 /// Asal data yang ditampilkan.
@@ -29,10 +32,8 @@ class FootballException implements Exception {
   String toString() => message;
 }
 
-/// Mengambil jadwal dan klasemen Premier League lewat HTTP (Modul V).
-///
-/// Urutan: cache Hive yang masih baru (15 menit), lalu internet, lalu cache
-/// lama bila internet gagal. Tanpa kunci API dipakai data contoh.
+/// Jadwal, klasemen, top skor, dan klub lewat HTTP (Modul V). Urutan: cache Hive baru,
+/// internet, cache lama bila gagal; tanpa kunci API dipakai data contoh.
 class FootballService {
   static const _boxName = 'football_cache';
   static const _freshFor = Duration(minutes: 15);
@@ -57,6 +58,10 @@ class FootballService {
     final items = list
         .map((e) => FootballMatch.fromJson(e as Map<String, dynamic>))
         .toList();
+    for (final m in items) {
+      CrestRegistry.register(m.homeName, m.homeCrest);
+      CrestRegistry.register(m.awayName, m.awayCrest);
+    }
     return FootballData(
       items,
       result.fromCache ? DataSource.cache : DataSource.network,
@@ -84,6 +89,9 @@ class FootballService {
     final items = table
         .map((e) => StandingRow.fromJson(e as Map<String, dynamic>))
         .toList();
+    for (final r in items) {
+      CrestRegistry.register(r.team, r.crest);
+    }
     return FootballData(
       items,
       result.fromCache ? DataSource.cache : DataSource.network,
@@ -103,6 +111,35 @@ class FootballService {
     final items = list
         .map((e) => ScorerRow.fromJson(e as Map<String, dynamic>))
         .toList();
+    for (final r in items) {
+      CrestRegistry.register(r.team, r.teamCrest);
+    }
+    return FootballData(
+      items,
+      result.fromCache ? DataSource.cache : DataSource.network,
+    );
+  }
+
+  /// Profil dan skuad 20 klub dalam satu permintaan. Data jarang berubah,
+  /// jadi cache-nya dianggap baru selama 24 jam. Tanpa kunci API, profil dasar
+  /// dibuat dari daftar stadion (tanpa pelatih dan skuad).
+  Future<FootballData<ClubInfo>> getClubs({bool refresh = false}) async {
+    final result = await _fetchJson(
+      '/competitions/PL/teams',
+      'clubs',
+      refresh,
+      freshFor: const Duration(hours: 24),
+    );
+    if (result == null) {
+      return FootballData(_sampleClubs(), DataSource.sample);
+    }
+    final list = result.json['teams'] as List<dynamic>? ?? [];
+    final items = list
+        .map((e) => ClubInfo.fromJson(e as Map<String, dynamic>))
+        .toList();
+    for (final c in items) {
+      CrestRegistry.register(c.shortName, c.crest);
+    }
     return FootballData(
       items,
       result.fromCache ? DataSource.cache : DataSource.network,
@@ -113,8 +150,9 @@ class FootballService {
   Future<_Payload?> _fetchJson(
     String path,
     String cacheKey,
-    bool refresh,
-  ) async {
+    bool refresh, {
+    Duration freshFor = _freshFor,
+  }) async {
     final box = await _openBox();
     final cachedBody = box.get(cacheKey);
     final cachedAt = DateTime.tryParse(box.get('${cacheKey}_at') ?? '');
@@ -122,7 +160,7 @@ class FootballService {
     final isFresh =
         cachedBody != null &&
         cachedAt != null &&
-        DateTime.now().difference(cachedAt) < _freshFor;
+        DateTime.now().difference(cachedAt) < freshFor;
     if (isFresh && !refresh) return _Payload(_decode(cachedBody), true);
 
     if (!AppConfig.hasFootballKey) return null;
@@ -221,6 +259,13 @@ class FootballService {
           goalDiff: teams[i][2] as int,
           points: teams[i][1] as int,
         ),
+    ];
+  }
+
+  List<ClubInfo> _sampleClubs() {
+    return [
+      for (final s in stadiums)
+        ClubInfo(name: s.club, shortName: s.club, tla: s.tla, venue: s.name),
     ];
   }
 

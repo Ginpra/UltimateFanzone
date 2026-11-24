@@ -14,14 +14,12 @@ import '../widgets/club_crest.dart';
 import '../widgets/fade_slide_in.dart';
 import '../widgets/scrim_image.dart';
 import '../widgets/stat_tile.dart';
+import 'club_detail_page.dart';
 import 'login_page.dart';
 import 'settings_page.dart';
 
 /// Profil: identitas, ringkasan aktivitas, pengaturan, dan keluar.
-///
-/// [refreshTick] naik tiap pengguna berpindah tab; saat berubah, angka
-/// ringkasan dimuat ulang (layar ini disimpan IndexedStack, jadi tidak dibuat
-/// ulang sendiri). Klub favorit dibaca dari notifier bersama.
+/// Layar disimpan IndexedStack, jadi angka dimuat ulang saat [refreshTick] berubah.
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key, this.refreshTick = 0});
 
@@ -164,6 +162,14 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _favoriteRow(String? favorite) {
     final fz = context.fz;
     return AppCard(
+      onTap: favorite == null
+          ? null
+          : () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ClubDetailPage(clubName: favorite),
+              ),
+            ),
       child: Row(
         children: [
           favorite == null

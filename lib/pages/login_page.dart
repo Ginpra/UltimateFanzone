@@ -9,9 +9,7 @@ import '../widgets/scrim_image.dart';
 import 'home_page.dart';
 
 /// Layar masuk dan daftar (akun lokal, SharedPreferences).
-///
-/// Setelah daftar berhasil, pengguna dikembalikan ke mode Masuk dan harus
-/// login dulu; ia tidak langsung masuk ke Home.
+/// Setelah daftar, pengguna kembali ke form Masuk dan harus login dulu.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 

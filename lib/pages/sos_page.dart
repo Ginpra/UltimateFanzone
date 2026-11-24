@@ -5,11 +5,8 @@ import '../core/format.dart';
 import '../service/location_service.dart';
 import '../service/notification_service.dart';
 
-/// Tombol SOS: tahan tombol merah untuk mengambil lokasimu sekarang.
-///
-/// Lokasi ditampilkan di layar dan lewat notifikasi di HP ini. **Tidak ada
-/// pesan yang dikirim ke siapa pun**; salin koordinatnya lalu kirim sendiri.
-/// Modul: VII (lokasi dan notifikasi instan).
+/// SOS: tahan tombol merah untuk mengambil lokasi. Lokasi tampil di layar dan lewat
+/// notifikasi di HP ini; **tidak dikirim ke siapa pun**. Modul: VII.
 class SosPage extends StatefulWidget {
   const SosPage({super.key});
 

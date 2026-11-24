@@ -5,8 +5,7 @@
       "name": "Ultimate Fanzone",
       "request": "launch",
       "type": "dart",
-      "program": "lib/main.dart",
-      "args": ["--dart-define-from-file=env.json"]
+      "program": "lib/main.dart"
     }
   ]
 }

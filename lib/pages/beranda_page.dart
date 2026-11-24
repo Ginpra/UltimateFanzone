@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/app_images.dart';
 import '../core/app_tokens.dart';
 import '../core/club_stats.dart';
+import '../core/feature_tones.dart';
 import '../core/format.dart';
 import '../model/football_match.dart';
 import '../model/standing_row.dart';
@@ -14,19 +15,18 @@ import '../widgets/club_crest.dart';
 import '../widgets/countdown_block.dart';
 import '../widgets/error_state.dart';
 import '../widgets/fade_slide_in.dart';
+import '../widgets/form_dot.dart';
 import '../widgets/scrim_image.dart';
 import '../widgets/section_header.dart';
 import '../widgets/stat_tile.dart';
-import 'club_profile_page.dart';
+import '../widgets/tone_icon.dart';
+import 'club_detail_page.dart';
 import 'notes_page.dart';
 import 'prediction_page.dart';
 import 'reminder_page.dart';
 
-/// Beranda: sapaan, laga berikutnya (fokus utama layar ini), ringkasan klub
-/// favorit, pintasan fitur, dan tiga klub teratas.
-///
-/// Klub favorit dibaca dari [SettingsService.favoriteNotifier], jadi beranda
-/// ikut berubah begitu klub dipilih di tab Laga.
+/// Beranda: laga berikutnya sebagai fokus, ringkasan klub favorit, pintasan, dan tiga
+/// klub teratas. Ikut berubah lewat [SettingsService.favoriteNotifier].
 class BerandaPage extends StatefulWidget {
   const BerandaPage({super.key, required this.onOpenLaga});
 
@@ -258,11 +258,11 @@ class _BerandaPageState extends State<BerandaPage> {
               for (final m in form)
                 Padding(
                   padding: const EdgeInsets.only(right: AppSpacing.sm),
-                  child: _FormDot(result: resultFor(m, favorite)!),
+                  child: FormDot(result: resultFor(m, favorite)!),
                 ),
             const Spacer(),
             TextButton(
-              onPressed: () => _push(const ClubProfilePage()),
+              onPressed: () => _push(ClubDetailPage(clubName: favorite)),
               child: const Text('Profil klub'),
             ),
           ],
@@ -276,12 +276,19 @@ class _BerandaPageState extends State<BerandaPage> {
       _Quick(
         Icons.scoreboard_outlined,
         'Prediksi',
+        FeatureTone.play,
         () => _push(const PredictionPage()),
       ),
-      _Quick(Icons.edit_note, 'Catatan', () => _push(const NotesPage())),
+      _Quick(
+        Icons.edit_note,
+        'Catatan',
+        FeatureTone.personal,
+        () => _push(const NotesPage()),
+      ),
       _Quick(
         Icons.notifications_active_outlined,
         'Pengingat',
+        FeatureTone.personal,
         () => _push(const ReminderPage()),
       ),
     ];
@@ -295,7 +302,7 @@ class _BerandaPageState extends State<BerandaPage> {
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
               child: Column(
                 children: [
-                  Icon(actions[i].icon),
+                  ToneIcon(icon: actions[i].icon, tone: actions[i].tone),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     actions[i].label,
@@ -322,30 +329,34 @@ class _BerandaPageState extends State<BerandaPage> {
           onAction: widget.onOpenLaga,
         ),
         for (final r in top)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 24,
-                  child: Text(
-                    '${r.position}',
-                    style: Theme.of(context).textTheme.titleMedium,
+          InkWell(
+            onTap: () => _push(ClubDetailPage(clubName: r.team)),
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 24,
+                    child: Text(
+                      '${r.position}',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                   ),
-                ),
-                ClubCrest(name: r.team, size: 32),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    r.team,
-                    style: Theme.of(context).textTheme.bodyLarge,
+                  ClubCrest(name: r.team, size: 32),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Text(
+                      r.team,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
                   ),
-                ),
-                Text(
-                  '${r.points} poin',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-              ],
+                  Text(
+                    '${r.points} poin',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ],
+              ),
             ),
           ),
       ],
@@ -395,31 +406,10 @@ class _BerandaPageState extends State<BerandaPage> {
 }
 
 class _Quick {
-  const _Quick(this.icon, this.label, this.onTap);
+  const _Quick(this.icon, this.label, this.tone, this.onTap);
 
   final IconData icon;
   final String label;
+  final FeatureTone tone;
   final VoidCallback onTap;
-}
-
-/// Bulatan kecil hasil W, D, atau L (hijau, abu-abu, merah).
-class _FormDot extends StatelessWidget {
-  const _FormDot({required this.result});
-
-  final String result;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = result == 'W'
-        ? Colors.green
-        : (result == 'L' ? Colors.red : Colors.grey);
-    return CircleAvatar(
-      radius: 12,
-      backgroundColor: color,
-      child: Text(
-        result,
-        style: const TextStyle(color: Colors.white, fontSize: 12),
-      ),
-    );
-  }
 }

@@ -4,11 +4,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'session_service.dart';
 
-/// Menyimpan SATU daftar data (list of JSON) di Hive, terpisah per akun.
-///
-/// Dipakai bersama oleh NotesService, PredictionService, dan ExpenseService
-/// supaya kode buka-box dan baca-tulis JSON tidak ditulis berulang.
-/// Kunci di Hive: `<baseKey>_<username>` (Modul VI).
+/// Satu daftar JSON di Hive per akun (kunci `<baseKey>_<username>`), dipakai bersama
+/// oleh service catatan, tebakan, pengeluaran, dan stempel.
 class LocalListStore {
   LocalListStore(this.baseKey);
 

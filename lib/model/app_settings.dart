@@ -1,4 +1,3 @@
-/// Pengaturan suporter yang disimpan di SharedPreferences.
 class AppSettings {
   const AppSettings({required this.nickname, required this.newestFirst});
 

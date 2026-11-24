@@ -2,15 +2,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-/// Notifikasi lokal (Modul VII): langsung (immediate) dan terjadwal.
-///
-/// Dibuat sebagai singleton supaya seluruh aplikasi memakai satu plugin.
-/// `init()` dipanggil sekali di `main()`.
-///
-/// Catatan versi: paket `flutter_local_notifications` versi baru (22 ke atas)
-/// memakai parameter BERNAMA (`id:`, `title:`, ...), beda dengan contoh modul
-/// yang memakai parameter posisi. Di `pubspec.yaml` versinya dikunci ke 22.3.3
-/// karena versi 23 menuntut compileSdk 37.
+/// Notifikasi lokal (Modul VII): langsung dan terjadwal, lewat singleton.
+/// Paket versi 22 ke atas memakai parameter bernama; dikunci ke 22.3.3 karena versi 23
+/// menuntut compileSdk 37.
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
@@ -23,11 +17,9 @@ class NotificationService {
   static const _channelName = 'Reminder Notifications';
 
   Future<void> init() async {
-    // 1. Zona waktu (dipakai notifikasi terjadwal)
     tz.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('Asia/Jakarta'));
 
-    // 2. Konfigurasi Android
     const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
@@ -35,7 +27,6 @@ class NotificationService {
       settings: const InitializationSettings(android: androidSettings),
     );
 
-    // 3. Izin notifikasi dan channel
     final android = _plugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
@@ -74,10 +65,8 @@ class NotificationService {
     );
   }
 
-  /// Scheduled notification: muncul pada [scheduledTime] (jam lokal).
-  ///
-  /// Android 12 ke atas bisa menolak alarm tepat waktu. Bila ditolak, dicoba
-  /// lagi dengan alarm tidak-tepat (bisa terlambat beberapa menit).
+  /// Muncul pada [scheduledTime] (jam lokal). Bila alarm tepat waktu ditolak (Android 12+),
+  /// dicoba alarm tidak-tepat.
   Future<void> scheduleNotification({
     required int id,
     required String title,

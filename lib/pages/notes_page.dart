@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/app_tokens.dart';
 import '../core/format.dart';
 import '../model/app_settings.dart';
 import '../model/match_note.dart';
@@ -10,9 +11,7 @@ import 'note_form_page.dart';
 import 'settings_page.dart';
 
 /// Daftar catatan laga pribadi.
-///
-/// Materi modul: II Widget, III setState, IV Navigator.push + hasil pop,
-/// VI Hive (catatan) dan SharedPreferences (pengaturan).
+/// Modul: II, III, IV (push dan hasil pop), VI (Hive dan SharedPreferences).
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
 
@@ -133,9 +132,11 @@ class _NotesPageState extends State<NotesPage> {
                           title: 'Belum ada catatan',
                           message: 'Tekan tombol Catatan untuk menulis yang pertama.',
                         )
-                      : ListView.builder(
+                      : ListView.separated(
                           padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
                           itemCount: _notes.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: AppSpacing.md),
                           itemBuilder: (context, index) {
                             final note = _notes[index];
                             return Dismissible(
@@ -152,6 +153,7 @@ class _NotesPageState extends State<NotesPage> {
                                 ),
                               ),
                               child: Card(
+                                margin: EdgeInsets.zero,
                                 child: ListTile(
                                   title: Text(note.match),
                                   subtitle: Text(

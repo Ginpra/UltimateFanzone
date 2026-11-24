@@ -64,3 +64,6 @@ android/key.properties
 server/node_modules/
 server/data/
 env.json
+# Kunci API lokal dan log hasil analyze/test
+lib/core/secrets.dart
+/*.txt

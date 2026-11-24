@@ -3,12 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/app_tokens.dart';
 import 'press_scale.dart';
 
-/// Wadah kartu seragam untuk mengelompokkan konten di dalam aplikasi.
-///
-/// Menungkus isi apa pun dengan [Card] beserta tema yang sudah diatur di
-/// `AppTheme` (sudut membulat, tanpa bayangan, garis outline tipis), sehingga
-/// tampilan antar layar konsisten. Dipakai sebagai blok dasar oleh banyak
-/// layar fitur, antara lain [StatTile] dan [SettingsSection].
+/// Kartu seragam bertema aplikasi; bila [onTap] ada, kartu mengecil saat ditekan.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -31,11 +26,12 @@ class AppCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final content = Padding(padding: padding, child: child);
     if (onTap == null) {
-      return Card(child: content);
+      return Card(margin: EdgeInsets.zero, child: content);
     }
     // Kartu yang bisa diketuk: ripple di dalam kartu dan mengecil saat ditekan.
     return PressScale(
       child: Card(
+        margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
         child: InkWell(onTap: onTap, child: content),
       ),
