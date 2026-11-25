@@ -1,171 +1,200 @@
-# Ultimate Fanzone (Liga Inggris)
+# Ultimate Fanzone
 
-Panduan lengkap ada di **GUIDELINE_LANJUTAN.md**.
+Aplikasi pendamping suporter Liga Inggris (Premier League) yang dibuat dengan
+Flutter. Pengguna dapat memantau jadwal, klasemen, dan top skor, menjelajahi 20
+klub dan stadionnya di peta, mengumpulkan stempel stadion lewat GPS, memasang
+pengingat kickoff, mencatat pengeluaran tandang, menebak skor, serta bertanya
+kepada Pundit AI.
 
-| Item                                | Nilai                  |
-| ----------------------------------- | ---------------------- |
-| Nama paket Dart                     | `ultimate_fanzone`   |
-| Label aplikasi                      | Ultimate Fanzone     |
-| `applicationId` / namespace Android | `com.smartfootballfan` |
-| Bundle ID iOS                       | `com.smartfootballfan` |
+Proyek akhir Praktikum Pemrograman Aplikasi Mobile.
 
-> Folder repositori masih bernama `smart_global_traveler` (nama lama tidak diubah
-> supaya riwayat Git tetap terhubung). Nama paket dan ID di dalam proyek sudah
-> memakai `ultimate_fanzone` / `com.smartfootballfan`.
+| Item                                | Nilai                                    |
+| ----------------------------------- | ---------------------------------------- |
+| Nama paket Dart                     | `ultimate_fanzone`                       |
+| Label aplikasi                      | Ultimate Fanzone                         |
+| `applicationId` / namespace Android | `com.smartfootballfan`                   |
+| Repositori                          | https://github.com/Ginpra/UltimateFanzone |
+| Versi Dart                          | `>=3.2.0 <4.0.0`                         |
 
-## Setup
+## Fitur
+
+| Fitur                  | Keterangan singkat                                                                 |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| Login dan daftar       | Akun lokal, opsi masuk dengan sidik jari (biometrik).                              |
+| Beranda                | Laga berikutnya, ringkasan klub favorit, pintasan fitur, tiga klub teratas.        |
+| Laga                   | Jadwal per hari, klasemen, dan top skor dari football-data.org.                    |
+| Klub                   | Direktori 20 klub dengan pencarian, halaman detail, dan klub favorit.              |
+| Pundit AI              | Tanya jawab sepak bola dengan Gemini API.                                          |
+| Peta Stadion           | Peta OpenStreetMap, posisi pengguna, jarak ke tiap stadion, urut dari terdekat.    |
+| Paspor Suporter        | Stempel stadion bila pengguna berada dalam radius 800 m (ada mode demo).           |
+| Pengingat laga        | Notifikasi terjadwal sebelum kickoff, menit pengingat dapat diubah.                |
+| SOS                    | Mengambil koordinat dan menampilkannya di layar dan notifikasi (tidak dikirim).   |
+| Away Day               | Pencatat pengeluaran tandang dan anggaran.                                         |
+| Prediksi skor          | Tebak skor laga; skor persis 3 poin, hasil benar 1 poin.                           |
+| Catatan laga           | Tambah, ubah, dan hapus catatan pribadi.                                           |
+| Refleks Kiper          | Game kecil dengan nyawa dan skor terbaik.                                          |
+
+## Teknologi
+
+| Paket                                      | Kegunaan                                           |
+| ------------------------------------------ | -------------------------------------------------- |
+| `http`                                     | Memanggil football-data.org dan Gemini API         |
+| `hive`, `hive_flutter`                     | Penyimpanan daftar data dan cache API              |
+| `shared_preferences`                       | Akun, sesi login, dan pengaturan                   |
+| `geolocator`                               | GPS dan perhitungan jarak                          |
+| `flutter_map`, `latlong2`                  | Peta OpenStreetMap dan koordinat                   |
+| `flutter_local_notifications`, `timezone`  | Notifikasi instan dan terjadwal (Asia/Jakarta)     |
+| `local_auth`                               | Masuk dengan sidik jari atau wajah                 |
+
+## Struktur folder
+
+```
+lib/
+  main.dart        Titik masuk: inisialisasi Hive, notifikasi, cek sesi login
+  core/            Tema, warna, format, konfigurasi, aturan game, kunci API
+  model/           Bentuk data (FootballMatch, ClubInfo, Expense, Stadium, dll.)
+  service/         Logika data: API, penyimpanan lokal, lokasi, notifikasi
+  pages/           Halaman (tampilan dan interaksi)
+  widgets/         Potongan tampilan yang dipakai ulang
+test/
+  model_test.dart  Pengujian model dan fungsi format
+```
+
+Pola yang dipakai: **Page** (tampilan, `setState`), **Service** (logika dan
+akses data), **Model** (bentuk data dengan `fromJson` / `toJson`).
+
+## Penyimpanan data
+
+Semua data tersimpan **lokal di perangkat**, tidak ada server.
+
+| Data                                              | Tempat                                  |
+| ------------------------------------------------- | --------------------------------------- |
+| Akun, sesi login, pengaturan, klub favorit, skor game | SharedPreferences                   |
+| Catatan, tebakan, pengeluaran, stempel (per akun) | Hive, box `local_lists`                 |
+| Cache jadwal, klasemen, top skor, klub            | Hive, box `football_cache`              |
+
+Key Hive memuat username (contoh `notes_v1_<username>`), sehingga data tiap
+akun terpisah.
+
+## Menjalankan aplikasi
+
+Prasyarat: Flutter SDK terbaru (`pubspec.lock` mensyaratkan Flutter 3.47.0 atau
+lebih baru), Android Studio atau VS Code, dan HP Android atau emulator.
 
 ```bash
-cd smart_global_traveler
-# Proyek sudah lengkap; perintah di bawah hanya bila perlu meregenerasi
-# platform. JANGAN timpa lib/main.dart & pubspec.yaml.
+git clone https://github.com/Ginpra/UltimateFanzone.git
+cd UltimateFanzone
 flutter pub get
+```
+
+### Mengisi kunci API
+
+Aplikasi memerlukan dua kunci. Pilih **salah satu** cara berikut.
+
+**Cara 1: `env.json` lalu skrip (Windows PowerShell)**
+
+1. Buat `env.json` di folder proyek (sudah ada di `.gitignore`):
+
+   ```json
+   {
+     "FOOTBALL_API_KEY": "isi_key_football_data",
+     "GEMINI_API_KEY": "isi_key_gemini",
+     "GEMINI_MODEL": ""
+   }
+   ```
+
+2. Jalankan sekali: `.\siapkan_kunci.ps1`. Skrip membuat
+   `lib/core/secrets.dart` (juga di `.gitignore`).
+3. `flutter run -d <id-perangkat>`
+
+**Cara 2: salin manual**
+
+Salin `lib/core/secrets.example.dart` menjadi `lib/core/secrets.dart`, isi
+kuncinya, lalu `flutter run`.
+
+**Cara 3: `--dart-define`** (mengalahkan isi `secrets.dart`)
+
+```bash
+flutter run \
+  --dart-define=FOOTBALL_API_KEY=ISI_KEY \
+  --dart-define=GEMINI_API_KEY=ISI_KEY
+```
+
+`GEMINI_MODEL` bersifat opsional. Bila kosong, aplikasi memakai daftar model
+bawaan dan mencoba model berikutnya jika satu model tidak ditemukan.
+
+### Mendapatkan kunci
+
+- **football-data.org:** daftar di https://www.football-data.org/client/register,
+  lalu uji kuncinya:
+
+  ```bash
+  curl -H "X-Auth-Token: KEY_ANDA" https://api.football-data.org/v4/competitions/PL/matches
+  ```
+
+- **Gemini:** buat API key melalui Google AI Studio, lalu isi `GEMINI_API_KEY`.
+
+### Bila kunci kosong
+
+- Tanpa `FOOTBALL_API_KEY`: aplikasi memakai **data contoh** dan menampilkan
+  banner, bukan jadwal resmi. Info klub, pelatih, dan skuad butuh kunci ini.
+- Tanpa `GEMINI_API_KEY`: Pundit AI tidak dapat dipakai.
+
+### Perilaku data jaringan
+
+- Hasil jadwal, klasemen, dan top skor di-cache 15 menit; data klub 24 jam.
+- Bila jaringan gagal, data cache terakhir dipakai.
+- Paket gratis football-data.org dibatasi jumlah request per menit (cek batas
+  terbaru di situs resminya).
+- **Jangan commit kunci API.** `env.json` dan `lib/core/secrets.dart` sudah ada
+  di `.gitignore`; hanya `secrets.example.dart` yang ikut repositori.
+
+## Izin dan konfigurasi Android
+
+Izin di `android/app/src/main/AndroidManifest.xml`:
+
+| Izin                                  | Dipakai untuk                          |
+| ------------------------------------- | -------------------------------------- |
+| `INTERNET`                            | Memanggil API                          |
+| `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` | Peta Stadion, Paspor, SOS    |
+| `USE_BIOMETRIC`, `USE_FINGERPRINT`    | Masuk dengan sidik jari                |
+| `POST_NOTIFICATIONS`                  | Menampilkan notifikasi                 |
+| `SCHEDULE_EXACT_ALARM`                | Pengingat tepat waktu                  |
+| `RECEIVE_BOOT_COMPLETED`, `VIBRATE`   | Menjadwalkan ulang alarm setelah restart HP, getar |
+
+- `MainActivity` memakai `FlutterFragmentActivity` (syarat `local_auth`).
+- `core library desugaring` diaktifkan di `android/app/build.gradle.kts`
+  (syarat `flutter_local_notifications`).
+- Receiver `ScheduledNotificationReceiver` dan
+  `ScheduledNotificationBootReceiver` terdaftar di manifest.
+
+Pada iOS, `Info.plist` memuat deskripsi izin lokasi dan Face ID. Pengujian
+utama dilakukan pada Android.
+
+## Pengujian
+
+```bash
 flutter analyze
-flutter run \
-  --dart-define=GEMINI_API_KEY=ISI_KEY_ANDA \
-  --dart-define=FOOTBALL_API_KEY=KEY_FOOTBALL_DATA
-# opsional untuk Supabase: --dart-define=SUPABASE_URL=https://PROJECT.supabase.co
-#                         --dart-define=SUPABASE_ANON_KEY=KUNCI_PUBLISHABLE
-# opsional legacy Node API: --dart-define=BACKEND_URL=https://backend-anda.com
-# opsional: --dart-define=KICKOFF_REMINDER_MINUTES=2  (hanya uji manual, produksi 30)
+flutter test
 ```
 
-## Uji manual di perangkat
+Uji manual di perangkat sungguhan untuk fitur yang bergantung perangkat: GPS
+(Peta, Paspor, SOS), notifikasi terjadwal, dan sidik jari. Emulator sering
+bermasalah pada ketiganya. Di emulator, atur lokasi lewat menu titik tiga
+(Extended controls), bagian Location. Paspor juga menyediakan **mode demo**
+untuk mencoba stempel tanpa berada di stadion.
 
-Lembar uji lengkap (19 baris, kolom hasil dan bukti) ada di
-**LEMBAR_UJI_T4.md**, termasuk cara menjalankan backend lokal dan mengambil
-alamat IP PC untuk sinkronisasi. Ringkasnya:
+## Keterbatasan yang diketahui
 
-```bash
-# terminal 1 - server sinkronisasi
-cd server && npm install && cp .env.example .env
-# isi JWT_SECRET di .env, lalu:
-node --env-file=.env index.js
+- Login hanya lokal dan password disimpan apa adanya (cukup untuk latihan,
+  belum layak produksi).
+- SOS hanya menampilkan lokasi di layar dan notifikasi lokal; tidak mengirimnya
+  ke siapa pun.
+- Riwayat percakapan Pundit AI tidak disimpan dan hilang saat layar ditutup.
+- Data tidak tersinkron antarperangkat karena tidak ada server.
 
-# terminal 2 - aplikasi (HP dan PC harus di Wi-Fi yang sama)
-ipconfig                       # ambil IPv4 Address, mis. 192.168.1.5
-flutter run \
-  --dart-define=BACKEND_URL=http://192.168.1.5:3000 \
-  --dart-define=KICKOFF_REMINDER_MINUTES=2
-```
+## Tim pengembang
 
-- `KICKOFF_REMINDER_MINUTES=2` hanya untuk uji, supaya pengingat kickoff bisa
-  dibuktikan dalam 2-5 menit tanpa menunggu 30 menit. Nilai produksi tetap 30.
-- HTTP ke IP lokal hanya diizinkan pada **build debug**
-  (`android/app/src/debug/AndroidManifest.xml`). Build rilis tetap menolak trafik
-  cleartext. Di iOS, HTTP diblokir ATS, jadi pakai tunnel HTTPS untuk pengujian.
-
-## Izin Android — android/app/src/main/AndroidManifest.xml (di dalam <manifest>)
-
-```xml
-<uses-permission android:name="android.permission.INTERNET"/>
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-<uses-permission android:name="android.permission.USE_BIOMETRIC"/>
-<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-<uses-permission android:name="android.permission.CAMERA"/>
-```
-
-- Ganti `MainActivity` menjadi `FlutterFragmentActivity` (syarat local_auth).
-- `android/app/build.gradle`: `minSdkVersion 23` (secure storage + ML Kit).
-
-## Izin iOS — ios/Runner/Info.plist
-
-`NSLocationWhenInUseUsageDescription`, `NSFaceIDUsageDescription`,
-`NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription`.
-`ios/Podfile`: `platform :ios, '15.5'` (syarat ML Kit).
-
-## Data pertandingan (football-data.org)
-
-1. Daftar gratis di https://www.football-data.org/client/register lalu ambil API key.
-2. Uji key Anda (satu perintah):
-
-```bash
-curl -H "X-Auth-Token: KEY_ANDA" https://api.football-data.org/v4/competitions/PL/matches
-```
-
-3. Jalankan app dengan `--dart-define=FOOTBALL_API_KEY=KEY_ANDA`.
-
-- Tanpa key, app memakai **DATA CONTOH** (ada banner merah) — bukan jadwal resmi.
-- Tier gratis: 10 request/menit, skor tertunda. Hasil di-cache 15 menit di Hive; jika gagal, data terakhir dipakai.
-- Jangan commit API key ke repositori publik.
-
-## Server sinkronisasi (opsional)
-
-Backend sinkronisasi hanya dipakai bila aplikasi dijalankan dengan
-`--dart-define=BACKEND_URL=https://...`. Tanpa `BACKEND_URL`, login dan
-sinkronisasi memakai mode lokal (mock).
-
-```bash
-cd server
-npm install
-cp .env.example .env        # isi JWT_SECRET (wajib, B1)
-node --env-file=.env index.js
-# endpoint: http://localhost:3000  (cek http://localhost:3000/health)
-```
-
-- **Wajib Node.js 22.5 atau lebih baru** (`node -v`): driver utama memakai
-  `node:sqlite` bawaan Node. `better-sqlite3` hanya cadangan bila modul itu tidak
-  tersedia.
-- `JWT_SECRET` wajib diisi. Server berhenti saat start kalau kosong, jadi tidak
-  mungkin berjalan dengan kunci yang ditebak.
-- `helmet` dipasang untuk header keamanan; `express-rate-limit` membatasi
-  `/auth/login` dan `/auth/register` (default 10 percobaan / 15 menit / IP).
-- Di produksi, taruh server di belakang reverse proxy yang mengakhiri TLS dan
-  set `TRUST_PROXY_HOPS` sesuai jumlah proxy di depan server.
-- Batasan yang diketahui: blok rantai yang sudah tersimpan tidak bisa diedit
-  (ditolak dengan 400), salt dan skor prediksi hanya diterima bersama-sama
-  sebagai bentuk ter-reveal, dan `POST /sync` dibatasi 5 MB per request.
-
-## Supabase langsung dan SQLite offline-first
-
-Mode ini tidak memerlukan server Node yang di-host. Flutter memakai Supabase
-Auth dan Data API langsung; `SUPABASE_URL` serta `SUPABASE_ANON_KEY` harus
-diisi bersama-sama. Gunakan anon/publishable key, **jangan pernah** memakai
-`service_role` key di aplikasi.
-
-1. Buat proyek Supabase dan aktifkan Email/Password pada Authentication.
-2. Buka SQL Editor lalu jalankan [`supabase/schema.sql`](supabase/schema.sql).
-   Tabel sudah memakai RLS dan setiap pengguna hanya dapat mengakses barisnya.
-3. Jalankan aplikasi dengan URL proyek dan anon key:
-
-```bash
-flutter run \
-  --dart-define=SUPABASE_URL=https://PROJECT_REF.supabase.co \
-  --dart-define=SUPABASE_ANON_KEY=ANON_OR_PUBLISHABLE_KEY
-```
-
-Aplikasi menyimpan pengeluaran, rantai paspor, dan prediksi lebih dulu ke
-SQLite lokal (`smart_football_fan.db` di folder application support), kemudian
-memperbarui salinan Hive yang dibaca UI. Data Hive lama diimpor saat startup.
-Saat online, perubahan dikirim otomatis; kegagalan jaringan mempertahankan
-revisi dan tombstone SQLite untuk dicoba lagi. Penghapusan Away Day ikut
-disinkronkan sehingga data yang dihapus tidak muncul kembali pada perangkat
-lain. Budget Away Day dan data lain yang belum termasuk skema sinkronisasi
-tetap lokal. Rantai blockchain di-cloud sebagai backup append-only dan tidak
-diambil kembali untuk mencegah rantai lokal yang berbeda digabung secara tidak
-valid.
-
-Akun dari backend Node lama tidak otomatis menjadi akun Supabase; pengguna
-perlu mendaftar di Supabase Auth. Jika konfirmasi email aktif, verifikasi email
-sebelum login. Tes koneksi cloud memerlukan URL, anon key, dan skema Supabase
-yang benar-benar dibuat; tanpa konfigurasi itu aplikasi tetap pada mode lokal.
-
-## Build rilis Android (C5)
-
-Buat keystore sekali, lalu isi `android/key.properties` (file itu di-ignore Git):
-
-```bash
-keytool -genkey -v -keystore ~/upload-keystore.jks \
-  -keyalg RSA -keysize 2048 -validity 10000 -alias upload
-```
-
-```properties
-storePassword=...
-keyPassword=...
-keyAlias=upload
-storeFile=/path/ke/upload-keystore.jks
-```
-
-Tanpa file itu, `flutter build apk --release` tetap berjalan memakai debug key
-(berguna untuk demo lokal) tetapi APK-nya tidak boleh diunggah ke Play Store.
+| Nama | NIM |
+| Gilang | 124240056 |
+| Shofa | 124240058 |                
