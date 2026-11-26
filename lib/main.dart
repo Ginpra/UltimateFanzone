@@ -12,7 +12,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await NotificationService().init();
-  await SettingsService().loadFavoriteClub();
+  final settings = SettingsService();
+  await settings.loadFavoriteClub();
+  await settings.loadThemeMode();
 
   // Sudah login sebelumnya? Langsung ke Home, kalau belum ke layar Login.
   final user = await SessionService().currentUser();
@@ -28,11 +30,16 @@ class FanzoneApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Ultimate Fanzone',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark,
-      home: startPage,
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: SettingsService.themeModeNotifier,
+      builder: (context, themeMode, _) => MaterialApp(
+        title: 'Ultimate Fanzone',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: themeMode,
+        home: startPage,
+      ),
     );
   }
 }

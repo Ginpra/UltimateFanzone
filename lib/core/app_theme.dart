@@ -13,8 +13,8 @@ import 'app_tokens.dart';
 /// [FanzoneColors] dan dibaca lewat `context.fz` (lihat `app_tokens.dart`).
 /// Token [AppSpacing] dan [AppRadius] dipakai untuk jarak dan radius sudut.
 ///
-/// Pilihan mode tema pengguna disimpan lewat `ThemeModeNotifier` pada
-/// `theme_provider.dart`.
+/// Pilihan mode tema pengguna disimpan lewat `themeModeNotifier` pada
+/// `SettingsService`.
 class AppTheme {
   static const String _fontDisplay = 'BarlowCondensed';
   static const String _fontBody = 'Inter';

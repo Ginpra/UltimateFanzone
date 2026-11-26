@@ -15,6 +15,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final _service = SettingsService();
   final _nicknameController = TextEditingController();
   bool _newestFirst = true;
+  bool _darkTheme = true;
   bool _loading = true;
 
   @override
@@ -31,12 +32,20 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _load() async {
     final settings = await _service.load();
+    final themeMode = await _service.loadThemeMode();
     if (!mounted) return;
     setState(() {
       _nicknameController.text = settings.nickname;
       _newestFirst = settings.newestFirst;
+      _darkTheme = themeMode == ThemeMode.dark;
       _loading = false;
     });
+  }
+
+  Future<void> _setDarkTheme(bool enabled) async {
+    await _service.saveDarkTheme(enabled);
+    if (!mounted) return;
+    setState(() => _darkTheme = enabled);
   }
 
   Future<void> _save() async {
@@ -69,6 +78,22 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  secondary: Icon(
+                    _darkTheme
+                        ? Icons.dark_mode_outlined
+                        : Icons.light_mode_outlined,
+                  ),
+                  title: const Text('Tema gelap'),
+                  subtitle: Text(
+                    _darkTheme
+                        ? 'Tampilan gelap aktif'
+                        : 'Tampilan terang aktif',
+                  ),
+                  value: _darkTheme,
+                  onChanged: _setDarkTheme,
+                ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Catatan terbaru di atas'),
