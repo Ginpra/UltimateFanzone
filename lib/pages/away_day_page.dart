@@ -55,33 +55,10 @@ class _AwayDayPageState extends State<AwayDayPage> {
   }
 
   Future<void> _editBudget() async {
-    final controller = TextEditingController(
-      text: _budget > 0 ? '$_budget' : '',
-    );
     final amount = await showDialog<int>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Anggaran Away Day'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          decoration: const InputDecoration(labelText: 'Anggaran (Rp)'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
-          ),
-          FilledButton(
-            onPressed: () =>
-                Navigator.pop(ctx, int.tryParse(controller.text) ?? 0),
-            child: const Text('Simpan'),
-          ),
-        ],
-      ),
+      builder: (ctx) => _BudgetDialog(initialAmount: _budget),
     );
-    controller.dispose();
     if (amount == null) return;
     await _settings.saveBudget(amount);
     await _load();
@@ -204,6 +181,75 @@ class _AwayDayPageState extends State<AwayDayPage> {
                     ),
               ],
             ),
+    );
+  }
+}
+
+class _BudgetDialog extends StatefulWidget {
+  const _BudgetDialog({required this.initialAmount});
+
+  final int initialAmount;
+
+  @override
+  State<_BudgetDialog> createState() => _BudgetDialogState();
+}
+
+class _BudgetDialogState extends State<_BudgetDialog> {
+  late final TextEditingController _controller;
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: widget.initialAmount > 0 ? '${widget.initialAmount}' : '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    if (!_formKey.currentState!.validate()) return;
+    Navigator.pop(
+      context,
+      int.tryParse(_controller.text.trim()) ?? 0,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Anggaran Away Day'),
+      content: Form(
+        key: _formKey,
+        child: TextFormField(
+          controller: _controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          decoration: const InputDecoration(labelText: 'Anggaran (Rp)'),
+          validator: (value) {
+            final amount = int.tryParse(value?.trim() ?? '');
+            if (amount == null || amount < 0) {
+              return 'Masukkan angka anggaran';
+            }
+            return null;
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+        FilledButton(
+          onPressed: _save,
+          child: const Text('Simpan'),
+        ),
+      ],
     );
   }
 }
